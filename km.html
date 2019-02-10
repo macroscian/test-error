@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Crick Biostatistics - ScienTest</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+     .axis path,
+     .axis line {
+	 fill: none;
+	 stroke: grey;
+	 stroke-width: 1;
+	 shape-rendering: crispEdges;
+     }
+    </style>
+  </head>
+  <body>
+
+
+    <div data-role="page" id="page1">
+
+      <div data-role="popup" id="welcome" data-overlay-theme="b" data-theme="b" data-position-to="window">
+	<div data-role="header">
+	  <h1>Welcome</h1>
+	</div><!-- /header -->
+	<div role="main" class="ui-content">
+	  <p>Your task is to find as many genes whose activity is associated with increased or decreased survival times. The charts you will see will have two lines that representing patients that have either <span style="color:#1f77b4">normal</span> or <span style="color:#FF7F0E">abnormal</span> activity levels for the gene displayed. </p>
+	  <p>If the curves have very different shapes, then there is possibly evidence of association between that gene and patient prognosis</p>
+	  <p>You can claim a gene is associated by pressing the <span style="color:#CCEBC5">right button</span>.  The <span style="color:#FBB4AE">left button</span> will indicate that you don't believe an association exists</p>
+	  <p>Either choice you make can be right or wrong. In science mistakes only become apparent in further experiments - here you'll get the full impact of mistakes immediately!</p>
+	  <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b" data-rel="back">OK</a>
+	</div>
+      </div>
+
+      <div data-role="header">
+	<h1>Crick ScienTest</h1>
+      </div><!-- /header -->
+
+      <div role="main" class="ui-content">
+	<svg id="KM_plot"></svg>
+	<fieldset class="ui-grid-a">
+	  <div class="ui-block-a"><button class="ui-btn" id="reject" style="color:red;font-size:12px" >Try another</button></div>
+	  <div class="ui-block-b"><button class="ui-btn" id="accept" style="color:green;font-size:12px">Submit Coursework</button> </div>
+	</fieldset>
+	<h3 id="last_result" class="ui-bar ui-bar-a ui-corner-all"></h3>
+	<div id="outcome" class="ui-body"></div>
+      </div><!-- /content -->
+      <div data-role="footer">
+	<h4>Latest Info</h4>
+	<p>You are currently <span class="player_status"></span>, and have a reputation of <span id="player_reputation"></span>.</p>
+	<p class="player_descrip"></p>
+      </div><!-- /footer -->
+
+      <div data-role="popup" id="popupDialog" data-overlay-theme="b" data-theme="b" style="max-width:400px;">
+	<div data-role="header">
+	  <h1>Congratulations</h1>
+	</div><!-- /header -->
+	<div role="main" class="ui-content">
+	  <p>Well done, your reputation is now high enough that you've been promoted to <span class="player_status"></span>.
+	    <span class="player_descrip"</span>
+	  </p>
+	  <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b" data-rel="back">OK</a>
+	</div>
+      </div>
+
+      
+    </div><!-- /page -->
+    
+    
+    
+    <script>
+     var player_state = {level:"Undergraduate",
+			 reputation:100,
+			 max_reputation:100,
+			 publications:0,
+			 retractions:0
+     };
+     var posOrNeg;
+     var level_lookup = {descrip: {Undergraduate: "Your lecturer says one in five genes are interesting. You need a reputation of 120 to graduate.",
+				   PhDStudent: "You now do replicates, so there are error bars  - boring genes will usually have overlapping error bars. But you don't know how many genes are interesting, and your professor will penalise you if you miss interesting genes. You need a reputation of 200 to submit your thesis.",
+				   PostDoc: "You can now consult a statistician - if you take their advice, your retraction rate shouldn't be higher than one in twenty.",
+				   PI: "You've only got a few year's funding. Can you win the Nobel prize - mistakes either way are hugely costly at this level."},
+			 status: {Undergraduate: "an undergraduate",
+				  PhDStudent: "a PhD student",
+				  PostDoc: "a post-doctoral researcher",
+				  PI: "running your own laboratory"},
+			 threshold: {Undergraduate: 120,
+				     PhDStudent: 200,
+				     PostDoc: 300,
+				     PI: 400},
+			 promotion: {Undergraduate: "PhDStudent",
+				     PhDStudent: "PostDoc",
+				     PostDoc: "PI",
+				     PI: "Winner"},
+			 pPos: {Undergraduate: .2,
+				PhDStudent: .3,
+				PostDoc: .4,
+				PI: .1},
+			 trueNeg: {Undergraduate: {rep:1,msg:"Correct - nothing here. Are you sure you've got the patience to be a scientist, sifting through all these null findings?"},
+				   PhDStudent: {rep:1,msg:"Bet you thought you'd left all this tedium behind after graduation."},
+				   PostDoc: {rep:1,msg:"Even though you're getting better at focussing in on potentially interesting candidates, there's still plenty of these true negatives around. At least I didn't follow this up needlessly."},
+				   PI: {rep:1,msg:"Have all the easy targets been found?"}},
+			 falsePos: {Undergraduate: {rep:1,msg:"That's a false positive. This gene actually has no association with survival. As you're a beginner, we're not going to penalise you, but these mistakes can be very costly later in the game."},
+				    PhDStudent: {rep:0.8,msg:"You've just wasted resources following up that false lead."},
+				    PostDoc: {rep:0.5,msg:"Peer review caught the error just in time - having to retract that paper would have been career-threatening."},
+				    PI: {rep:0.1,msg:"You've had to retract this paper - your reputation will take a battering."}},
+			 truePos: {Undergraduate: {rep:1.1,msg:"Well done, your coursework is correct."},
+				   PhDStudent: {rep:1.5,msg:"Great, there might even be a Nature paper in that finding."},
+				   PostDoc: {rep:2,msg:"You've been asked to present this at a conference in Japan."},
+				   PI: {rep:10,msg:"Looking good for retaining funding for a bit longer."}},
+			 falseNeg: {Undergraduate: {rep:1,msg:"You missed a really good chance there - could that have been the one that put you top of the year."},
+				    PhDStudent: {rep:0.9,msg:"Someone else in your lab got to present this at a workshop in Italy. Jealous!"},
+				    PostDoc: {rep:0.8,msg:"Ouch, one of your competitors went on and published that in Cell - your lab head wants to know how you missed it."},
+				    PI: {rep:0.7,msg:"So what if you missed out on the Nobel prize this year. The field is always moving on, but are you keeping up?"}},
+			 label_accept: {Undergraduate: "Submit coursework",
+					PhDStudent: "Submit thesis chapter",
+					PostDoc: "Submit journal paper",
+					PI: "Investigate further"}
+     };
+
+     var margin = {top: 10, right: 50, bottom: 50, left: 50}
+       , width = window.innerWidth - margin.left - margin.right
+       , height = window.innerHeight/2 - margin.top - margin.bottom;
+
+     var xScale = d3.scaleLinear()
+		    .domain([0, 2000])
+		    .range([0, width]);
+     var yScale = d3.scaleLinear()
+		    .domain([0, 100]) 
+		    .range([height, 0]); 
+     var color = d3.scaleOrdinal(d3.schemeCategory10);
+     var line = d3.line()
+		  .x(function(d, i) { return xScale(d.t); }) 
+		  .y(function(d) { return yScale(d.s*100); }) 
+		  .curve(d3.curveMonotoneX)
+     var area = d3.area()
+		  .x(function(d, i) { return xScale(d.t); }) 
+		  .y0(function(d) { return yScale(d.l*100); }) 
+		  .y1(function(d) { return yScale(d.u*100); }) 
+		  .curve(d3.curveMonotoneX)
+     var svg;
+     
+     function reveal_result(event) {
+	 var correct = (posOrNeg==event.data.obs)?"true":"false";
+	 var outcome = level_lookup[correct + event.data.obs][player_state.level];
+	 var pn={trueNeg:"True Negative", falseNeg:"False Negative", truePos:"True Positive", falsePos:"False Positive"};
+	 var t0=d3.select("#last_result").transition().style("background-color","#E9E9E9").text("Last Result - " + pn[correct+event.data.obs]);
+	 t0.transition().style("background-color", (correct=="true")?"#CCEBC5":"#FBB4AE");
+	 $("#outcome").text(outcome.msg);
+	 player_state.reputation *= outcome.rep;
+	 $("#player_reputation").text(Math.floor(player_state.reputation));
+	 if (player_state.reputation >= level_lookup.threshold[player_state.level]) {
+	     $("#popupDialog").popup("open");
+	     player_state.level = level_lookup.promotion[player_state.level];
+	 }
+	 plot_chart();
+     }
+
+     function plot_chart() {
+	 $(".player_status").text(level_lookup.status[player_state.level]);
+	 $(".player_descrip").text(level_lookup.descrip[player_state.level]);
+	 $("#player_reputation").text(player_state.reputation);
+	 $("#accept").text(level_lookup.label_accept[player_state.level]);
+	 posOrNeg = (Math.random() <level_lookup.pPos[player_state.level] )?"Pos":"Neg";
+	 data_ind = Math.floor(Math.random()*datasets.length);
+	 if (posOrNeg=="Pos") {
+	     data_k1 = (Math.random()<0.5)?"Baseline":"None";
+	     data_k2 = (Math.random()<0.5)?"Up":"Down";
+	 } else {
+	     data_k1 = "Baseline";
+	     data_k2 = "None";
+	 }
+	 var lines = svg.selectAll(".KM_line")
+			.data([datasets[data_ind][data_k1], datasets[data_ind][data_k2]]);
+	 lines.transition().duration(750).delay(1000).attr("d",line);
+	 lines.enter()
+	      .append("path")
+	      .attr("stroke", function(d, i) { return color(i); })
+	      .style("fill", "none")
+	      .style("stroke-width", 2)
+	      .attr("class", "KM_line")
+ 	      .attr("d", line);
+	 var areas = svg.selectAll(".KM_area")
+			.data([datasets[data_ind][data_k1], datasets[data_ind][data_k2]]);
+	 areas.transition().duration(750).delay(1000).attr("d", area);
+	 areas.enter()
+	      .append("path")
+	      .style("stroke", "none")
+	      .style("fill", function(d, i) { return color(i); })
+	      .style("opacity", .5)
+	      .attr("class", "KM_area")
+ 	      .attr("d", area);
+     }
+     
+     $(function(){
+	 
+	 $("#accept" ).click({obs:"Pos"}, reveal_result);
+	 $("#reject" ).click({obs:"Neg"}, reveal_result);
+
+	 svg = d3.select("#KM_plot")
+		 .attr("width", width + margin.left + margin.right)
+		 .attr("height", height + margin.top + margin.bottom)
+		 .append("g")
+		 .attr("class", "plot_area")
+		 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	 svg.append("g")
+	    .attr("class", "x axis")
+	    .attr("transform", "translate(0," + height + ")")
+	    .call(d3.axisBottom(xScale));
+	 svg.append("g")
+	    .attr("class", "y axis")
+	    .call(d3.axisLeft(yScale));
+
+	 svg.append("text")             
+	    .attr("transform","translate(" + (width/2) + " ," + (height + margin.top + 20) + ")")
+	    .style("text-anchor", "middle")
+	    .text("Days after diagnosis");
+	 svg.append("text")
+	    .attr("transform", "rotate(-90)")
+	    .attr("y", 0 - margin.left)
+	    .attr("x",0 - (height / 2))
+	    .attr("dy", "1em")
+	    .style("text-anchor", "middle")
+	    .text("Survival %");
+	 d3.json("km.json").then(function(data) {datasets = data;plot_chart();});
+     });
+     $(document).on("pageshow","#page1", function(){
+	 $('#welcome').popup('reposition', 'positionTo: window');
+	 $("#welcome").popup("open");
+     });
+    </script>
+  </body>
+</html>
