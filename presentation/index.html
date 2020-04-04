@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ROC</title>
+<script src="js/d3.v5.min.js"></script> 
+<style> 
+.line {
+  fill: none;
+  stroke: rgba(0,128,255,0.5);
+  stroke-width: 2px;
+}
+</style>
+</head>
+
+<body>
+  <div style="display:flex">
+  <svg id="roc" width="620" height="620">
+    <g id="pound" style="opacity:0" transform="translate(0,500) scale(.2)">
+      <path d="M442.448,183.245c35.25-35.08,57.113-83.589,57.113-137.121C499.562,20.651,478.911,0,453.437,0H158.588
+	       c-25.473,0-46.124,20.651-46.124,46.125c0,53.529,21.862,102.039,57.102,137.121C87.886,230.569,32.669,318.718,32.669,419.73
+	       C32.669,612,231.241,612,306,612c74.76,0,273.331,0,273.331-192.272C579.345,318.729,524.128,230.567,442.448,183.245z
+	       M396.323,534.537h-179.83c-15.814,0-26.555-10.7-26.555-23.998c0-10.741,6.43-20.584,18.015-24.486l17.132-5.575v-60.488h-7.697
+	       c-14.996,0-27.45-12.006-27.45-27.042c0-15.023,12.454-27.478,27.45-27.478h7.697v-34.764c0-30.928,9.027-56.64,25.751-73.35
+	       c17.632-17.593,42.936-27.465,76.025-27.465c38.111,0,63.48,13.311,82.338,32.577c6.062,6.022,10.291,12.889,10.291,23.603
+	       c0,18.068-14.561,32.207-32.615,32.207c-11.582,0-19.318-5.575-23.576-9.871c-11.121-11.598-21.455-17.158-35.635-17.158
+	       c-10.307,0-18,2.99-24.445,9.408c-6.878,6.866-11.148,18.068-11.148,31.759v33.052h72.902c15.09,0,27.502,12.454,27.502,27.477
+	       c0,15.037-12.412,27.043-27.502,27.043h-72.89v57.497h104.24c15.934,0,28.795,12.889,28.795,28.729
+	       C425.118,522.124,412.259,534.537,396.323,534.537z"/>
+    </g>
+  </svg>
+  <img id="frog" src="img/frog.png"  width="20" height="20">
+  <img id="ides" src="img/ides.jpg" width="20" height="20">
+  </div>
+  <script>
+   var delay_sweep=1000;
+   var delay_pound=5000+delay_sweep;
+   var delay_improve=5000+delay_pound;
+   var svg = d3.select("svg");
+   var theta=d3.range(0, Math.PI/2,.1);
+   var data0=theta.map(function(d) {return {x:Math.cos(d), y:Math.sin(d)}});
+   data0.push({x:0, y:1});
+   var data=theta.map(function(d) {return {x:Math.sqrt(Math.cos(d)), y:Math.sqrt(Math.sin(d))}});
+   data.push({x:0, y:1});
+   var x_scale = d3.scaleLinear().domain([0,1]).range([0, 600]);
+   var y_scale = d3.scaleLinear().domain([0,1]).range([620, 20]);
+   
+   var line = d3.line()
+                .x(function(d) { return x_scale(d.x); })
+                .y(function(d) { return y_scale(d.y); });
+   var path = svg.append('path').attr('d', line(data0)).attr("class", "line");
+   svg.append('path').attr('d', line(data0)).attr("class", "line").style("stroke-dasharray", ("3, 3"));
+
+
+   
+   var circle = svg.append("circle")
+		   .attr("fill", "steelblue")
+		   .attr("r", 13);
+   //		   .attr("transform", "translate(" + points[0] + ")");
+   
+   function transition() {
+       circle.transition()
+	     .duration(5000)
+	     .attrTween("transform", translateAlong(path.node()))
+	     .ease(d3.easeLinear)
+	     .on("end", transition);
+   }
+   
+   function translateAlong(path) {
+       var l = path.getTotalLength();
+       return function(d, i, a) {
+	   return function(t) {
+	       var t2=(1-2*Math.abs(.5-t));
+	       var p = path.getPointAtLength(t2 * l);
+	       d3.select("#frog").attr("width", 20+40*t2).attr("height", 20+40*t2);
+	       d3.select("#ides").attr("height", 20+40*(1-t2)).attr("width", 20+40*(1-t2));
+	       return "translate(" + p.x + "," + p.y + ")";
+	   };
+       };
+   }
+   var t = d3.timer(function(elapsed) {
+       transition();
+       t.stop();
+   }, delay_sweep);
+
+   d3.select("#pound").transition().style("opacity", 1).duration(1000).delay(delay_pound);
+   path.transition().attr("d", line(data)).duration(5000).delay(delay_improve+1000);
+   d3.select("#pound").transition().delay(delay_improve+1000).duration(5000).attr("transform", "translate(0,312) scale(.5)").style("fill","red");
+  </script>
+</body>
+
+</html> 

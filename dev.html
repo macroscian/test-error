@@ -27,12 +27,12 @@
 
     <div data-role="page" id="page1">
 
-      <div data-role="popup" id="welcome" data-overlay-theme="b" data-theme="b" data-position-to="window" data-history="false">
+      <div data-role="popup" id="welcome" data-overlay-theme="b" data-theme="b" data-position-to="window">
 	<div data-role="header">
 	  <h1>Welcome</h1>
 	</div><!-- /header -->
-	<div role="main" class="ui-content" data-history=""false">
-	  <p>Your task is to find genes whose activity is associated with increased or decreased survival times. The charts you will see will have two lines that representing patients that have either <span style="color:#1f77b4">normal</span> or <span style="color:#FF7F0E">abnormal</span> activity levels for the gene displayed. </p>
+	<div role="main" class="ui-content" data-history=false>
+	  <p>Your task is to find as many genes whose activity is associated with increased or decreased survival times. The charts you will see will have two lines that representing patients that have either <span style="color:#1f77b4">normal</span> or <span style="color:#FF7F0E">abnormal</span> activity levels for the gene displayed. </p>
 	  <p>If the curves have very different shapes, then there is possibly evidence of association between that gene and patient prognosis</p>
 	  <p>You can claim a gene is associated by <span style="color:green">swiping right</span>.  Swipe <span style="color:red"> left</span> to indicate that you're not interested in this gene.</p>
 	  <p>Either choice you make can be right or wrong. In science mistakes only become apparent in further experiments - here you'll get the full impact of mistakes immediately!</p>
@@ -72,7 +72,7 @@
 	<p class="player_descrip"></p>
       </div><!-- /footer -->
 
-      <div data-role="popup" id="popupDialog" data-overlay-theme="b" data-theme="b" style="max-width:400px;" data-history="false">
+      <div data-role="popup" id="popupDialog" data-overlay-theme="b" data-theme="b" style="max-width:400px;">
 	<div data-role="header">
 	  <h1>Congratulations</h1>
 	</div><!-- /header -->
@@ -142,7 +142,7 @@
 	 // Will replace this with flag from dataset
 	 var correct = (posOrNeg==event.data.obs)?"true":"false";
 	 var outcome = level_lookup[correct + event.data.obs][player_state.level];
-	 var pn={trueNeg:"True Mismatch", falseNeg:"False Mismatch", truePos:"True Match", falsePos:"False Match"};
+	 var pn={trueNeg:"True Negative", falseNeg:"False Negative", truePos:"True Positive", falsePos:"False Positive"};
 	 var t0=d3.select("#last_result").transition().style("background-color","#E9E9E9").text("Last Result - " + pn[correct+event.data.obs]);
 	 t0.transition().style("background-color", (correct=="true")?"#CCEBC5":"#FBB4AE");
 	 $("#outcome").text(outcome.msg);
@@ -161,7 +161,6 @@
        , width = window.innerWidth - margin.left - margin.right-10
        , height = window.innerHeight/2 - margin.top - margin.bottom;
      
-     $(".wrap").height(height+50);
      var xScale = d3.scaleLinear()
 		    .domain([0, 2000])
 		    .range([0, width]);
@@ -288,15 +287,6 @@
      $(document).on("pageshow","#page1", function(){
 	 $('#welcome').popup('reposition', 'positionTo: window');
 	 $("#welcome").popup("open");
-	 
-	 $("#welcome").on( "popupafterclose", function( event, ui ) {
-	     $("#progress").animate({width:100*player_state.reputation/(level_lookup.threshold[player_state.level]) + "%"});
-	     $(".pane2")
-		 .animate({left:+200},  {step:function( now, fx ) {$( ".like" ).css( "opacity", now/200 );}})
-		 .animate({left:+0},  {step:function( now, fx ) {$( ".like" ).css( "opacity", now/200 );}})
-		 .animate({left:-200},  {step:function( now, fx ) {$( ".dislike" ).css( "opacity", -now/200 );}})
-		 .animate({left:+0},  {step:function( now, fx ) {$( ".dislike" ).css( "opacity", -now/200 );}})
-	 });
      });
     </script>
   </body>

@@ -1,0 +1,109 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/white.css">
+    <style>
+     .container{
+	 display: flex;
+     }
+     .col{
+	 flex: 1;
+     }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+	<section>
+	  <h1>Dimension Reduction</h1>
+	  <p>Current thoughts, future directions</p>
+	</section>
+	<section>
+	  <section>
+	    <h2>Curse of dimensionality</h2>
+	    <p>Can't visualise</p>
+	    <p>Nothing is average</p>
+	    <p>Distances get out of perspective</p>
+	  </section>
+	  <section>
+	    <div class="container">
+	      <div class="col">
+		<ul>
+		<li>In two dimensions, confusing density and mass isn't too bad</li>
+		<li> In higher dimensions, volume grows ~r<sup>N</sup></li>
+		</ul>
+	      </div>
+		<img class="col" src="512px-Gaussian_2d.svg.png">
+	    </div>
+	  </section>
+	  <section>
+	    <p>Eventually, almost everything ends up on the shell of a 'sphere' with nothing in the middle</p>
+	    <p></p>
+	    <p>And on that shell, everything is equidistant from everything else</p>
+	  </section>
+	</section>
+	<section>
+	  <section>
+	    <h2>Remove noisy dimensions</h2>
+	    <p>Do something computationally easy to get rid of the worst noise</p>
+	    <ul>
+	      <li>Most informative genes</li>
+	      <li>Most consistent patterns of behaviour</li>
+	      <li>&Implies; PCA</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>PCA is linear</h2>
+	    <p>Want to capture as many components as there are linearly distinct processes</p>
+	    <ul style="color:red">
+	      <li>Increase weights of interesting genes</li>
+	      <li>Kernel-PCA</li>
+	      <li>Supervised PCA</li>
+	    </ul>
+	  </section>
+	</section>
+	<section>
+	  <section>
+	    <h2>tSNE and its ilk</h2>
+	    <ul>
+	    <li>Find a 2 dimensional surface in the PCA space that preserves neighbourliness</li>
+	    <li>Spread cells randomly in 2D and move them around until similarity in distribution of distances is found</li>
+	    <li>Crowding problem - there's not as much space in 2D.</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <ul>
+	    <li>It's an exploratory tool - <a href="top_tsne.html">not a complete picture</a></li>
+	    <li>Can't add extra <a href="all_tsne.html">samples</a>/cells</li>
+	    <li style="color:red">Can add extra info - sample_id, spatial information,...</li>
+	    <li style="color:red">Can use one run to 'seed' another</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>Alternatives</h2>
+	    <p><a href="top_umap.html">UMAP</a> should capture more of the global/topological nature of the data.  Fast and allows for prediction</p>
+	    <p><a href="top_phate.html">Phate</a> emphasises diffusion through states</p>
+	  </section>
+	</section>
+	<section>
+	  <h2>Clustering</h2>
+	  <div class="container">
+	    <div class="col">
+	      <ul>
+		<li>In PCA space</li>
+		<li>Hierarchical would give us insight ~ pseudotime</li>
+		<li>Visualise the distance matrix directly (&copy; Phil)</li>
+	      </ul>
+	    </div>
+	    <div class="col">
+	      <img class="col" src="hmap.png" height="300%">
+	    </div>
+	</section>
+      </div>
+    </div>
+    <script src="js/reveal.js"></script>
+    <script>
+     Reveal.initialize();
+    </script>
+  </body>
+</html>
