@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Crick Biostatistics - ScienTest</title>
+    <title>TestErr</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
@@ -31,17 +31,17 @@
 	<div data-role="header">
 	  <h1>Welcome</h1>
 	</div><!-- /header -->
-	<div role="main" class="ui-content" data-history=""false">
-	  <p>Your task is to find genes whose activity is associated with increased or decreased survival times. The charts you will see will have two lines that representing patients that have either <span style="color:#1f77b4">normal</span> or <span style="color:#FF7F0E">abnormal</span> activity levels for the gene displayed. </p>
-	  <p>If the curves have very different shapes, then there is possibly evidence of association between that gene and patient prognosis</p>
-	  <p>You can claim a gene is associated by <span style="color:green">swiping right</span>.  Swipe <span style="color:red"> left</span> to indicate that you're not interested in this gene.</p>
-	  <p>Either choice you make can be right or wrong. In science mistakes only become apparent in further experiments - here you'll get the full impact of mistakes immediately!</p>
+	<div role="main" class="ui-content" data-history="false">
+	  <p>Your task is to interpret and act upon the results of a test of positive (implying disease) vs negative (healthy) status.</p>
+	  <p>Two bars represent a pos<span style="color:red; font-weight:bold">i</span>t<span style="color:red; font-weight:bold">i</span>ve test, one bar a negat<span style="color:red; font-weight:bold">i</span>ve result. But the result isn't 100% sensitive, so your patient might have the disease even given a negative result. Nor is it completely specific so your patient may be healthy despite getting a positive result.</p>
+	  <p>You can diagnose a patient to be healthy by <span style="color:green">swiping right</span>.  Swipe <span style="color:red"> left</span> to indicate you believe the patient has the disease.</p>
+	  <p>Either choice you make can be right or wrong. In science mistakes only become apparent after further tests - here you'll get the full impact of mistakes immediately!</p>
 	  <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b" data-rel="back">OK</a>
 	</div>
       </div>
 
       <div data-role="header">
-	<h1>Crick ScienTest</h1>
+	<h1>TestErr</h1>
 	<div id="progress" style="height:5px;width:0%;background-color:green"></div>
       </div><!-- /header -->
 
@@ -52,19 +52,74 @@
 	      <li class="pane1">
 		<h3 id="last_result" class="ui-bar ui-bar-a ui-corner-all"></h3>
 		<div id="outcome" class="ui-body"></div>
+		<input type="image" src="img/continue.png" onclick='$("#tinderslide").jTinder("like");' />
 	      </li>
               <li class="pane2">
-		<svg id="KM_plot"></svg>
+		<svg
+		    id="SVG_plot"
+		    version="1.1"
+		    viewBox="0 0 100 40"
+		    width="100%">
+		  <text
+		      xml:space="preserve"
+		      style="font-style:normal;font-weight:normal;font-size:2.8px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+		      x="42.012325"
+		      y="11.112646"
+		      id="controlstr"><tspan
+					  id="tspan994"
+					  x="42.012325"
+					  y="11.112646"
+					  style="font-size:2.8px;stroke-width:0.26458332">Control</tspan></text>
+		  <text
+		      xml:space="preserve"
+		      style="font-style:normal;font-weight:normal;font-size:2.8px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+		      x="59.674431"
+		      y="11.020315"
+		      id="teststr"><tspan
+				       id="tspan994-8"
+				       x="59.674431"
+				       y="11.020315"
+				       style="font-size:2.8px;stroke-width:0.26458332">Test</tspan></text>
+		  <rect
+		      style="display:inline;fill:none;stroke:#000000;stroke-width:0.23728547;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+		      id="boundary"
+		      width="71.216873"
+		      height="27.970238"
+		      x="11.919201"
+		      y="5.5472617"
+		      ry="6.2366071" />
+		  <path
+		      style="display:inline;fill:none;stroke:#000000;stroke-width:0.22699943;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+		      d="M 83.35504,27.290543 H 27.380029 c -2.533007,0 -4.572218,-2.783962 -4.572218,-6.242062 V 5.5379035"
+		      id="rim" />
+		  <rect
+		      style="display:inline;fill:none;stroke:#000000;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+		      id="window"
+		      width="37.041672"
+		      height="6.0476227"
+		      x="36.98518"
+		      y="13.976156" />
+		  <rect
+		      style="display:inline;fill:#ff0000;stroke:#000000;stroke-width:0.20171277;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+		      id="control"
+		      width="2.7091205"
+		      height="6.1109066"
+		      x="45.749615"
+		      y="13.94451" />
+		  <rect
+		      style="display:inline;fill:#ff0000;stroke:#000000;stroke-width:0.20171277;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+		      id="test"
+		      width="2.7091205"
+		      height="6.1109066"
+		      x="61.142784"
+		      y="13.94451" />
+		</svg>
 		<div class="like"></div>
                 <div class="dislike"></div>
 	      </li>
 	    </ul>
 	  </div>
 	</div>
-	<!-- <fieldset class="ui-grid-a">
-	     <div class="ui-block-a"><button class="ui-btn" id="reject" style="color:red;font-size:12px" >Try another</button></div>
-	     <div class="ui-block-b"><button class="ui-btn" id="accept" style="color:green;font-size:12px">Submit Coursework</button> </div>
-	     </fieldset> -->
       </div><!-- /content -->
       <div data-role="footer">
 	<h4>Latest Info</h4>
@@ -90,63 +145,66 @@
     
     
     <script>
-     var player_state = {level:"Undergraduate",
-			 reputation:50,
-			 max_reputation:50,
-			 publications:0,
-			 retractions:0
+     var player_state = {level:"Unsymptomatic",
+			 reputation:10,
+			 max_reputation:10
      };
      var posOrNeg;
-     var level_lookup = {descrip: {Undergraduate: "Your lecturer says one in five genes are interesting. You need a reputation of 120 to graduate.",
-				   PhDStudent: "You now do replicates, so there are error bars  - boring genes will usually have overlapping error bars. But you don't know how many genes are interesting, and your professor will penalise you if you miss interesting genes. You need a reputation of 200 to submit your thesis.",
-				   PostDoc: "You can now consult a statistician - if you take their advice, your retraction rate shouldn't be higher than one in twenty.",
-				   PI: "You've only got a few year's funding. Can you win the Nobel prize - mistakes either way are hugely costly at this level."},
-			 status: {Undergraduate: "an undergraduate",
-				  PhDStudent: "a PhD student",
-				  PostDoc: "a post-doctoral researcher",
-				  PI: "running your own laboratory"},
-			 threshold: {Undergraduate: 120,
-				     PhDStudent: 200,
-				     PostDoc: 300,
-				     PI: 400},
-			 promotion: {Undergraduate: "PhDStudent",
-				     PhDStudent: "PostDoc",
-				     PostDoc: "PI",
-				     PI: "Winner"},
-			 pPos: {Undergraduate: .2,
-				PhDStudent: .3,
-				PostDoc: .4,
-				PI: .1},
-			 trueNeg: {Undergraduate: {rep:1,msg:"Correct - nothing here. Are you sure you've got the patience to be a scientist, sifting through all these null findings?"},
-				   PhDStudent: {rep:1,msg:"Bet you thought you'd left all this tedium behind after graduation."},
-				   PostDoc: {rep:1,msg:"Even though you're getting better at focussing in on potentially interesting candidates, there's still plenty of these true negatives around. At least I didn't follow this up needlessly."},
-				   PI: {rep:1,msg:"Have all the easy targets been found?"}},
-			 falsePos: {Undergraduate: {rep:1,msg:"That's a false positive. This gene actually has no association with survival. As you're a beginner, we're not going to penalise you, but these mistakes can be very costly later in the game."},
-				    PhDStudent: {rep:0.8,msg:"You've just wasted resources following up that false lead."},
-				    PostDoc: {rep:0.5,msg:"Peer review caught the error just in time - having to retract that paper would have been career-threatening."},
-				    PI: {rep:0.1,msg:"You've had to retract this paper - your reputation will take a battering."}},
-			 truePos: {Undergraduate: {rep:1.2,msg:"Well done, your coursework is correct."},
-				   PhDStudent: {rep:1.5,msg:"Great, there might even be a Nature paper in that finding."},
-				   PostDoc: {rep:2,msg:"You've been asked to present this at a conference in Japan."},
-				   PI: {rep:10,msg:"Looking good for retaining funding for a bit longer."}},
-			 falseNeg: {Undergraduate: {rep:1,msg:"You missed a really good chance there - could that have been the one that put you top of the year."},
-				    PhDStudent: {rep:0.9,msg:"Someone else in your lab got to present this at a workshop in Italy. Jealous!"},
-				    PostDoc: {rep:0.8,msg:"Ouch, one of your competitors went on and published that in Cell - your lab head wants to know how you missed it."},
-				    PI: {rep:0.7,msg:"So what if you missed out on the Nobel prize this year. The field is always moving on, but are you keeping up?"}},
-			 label_accept: {Undergraduate: "Submit coursework",
-					PhDStudent: "Submit thesis chapter",
-					PostDoc: "Submit journal paper",
-					PI: "Investigate further"}
+     var level_lookup = {descrip: {Unsymptomatic: "Your patient has no symptoms",
+				   Symptomatic: "Your patient has a disease symptom ",
+				   Keyworker: "Your patient works in an environment with a moderate exposure to others with the disease, and is not in self isolation",
+				   Medic: "You work in an environment with a high exposure to others"},
+			 status: {Unsymptomatic: "Level 1",
+				  Symptomatic: "Level 2",
+				  Keyworker: "Level 3",
+				  Medic: "Level 4"},
+			 threshold: {Unsymptomatic: 10,
+				     Symptomatic: 20,
+				     Keyworker: 30,
+				     Medic: 40},
+			 promotion: {Unsymptomatic: "Symptomatic",
+				     Symptomatic: "Keyworker",
+				     Keyworker: "Medic",
+				     Medic: "Winner"},
+			 pPos: {Unsymptomatic: .5,
+				Symptomatic: .5,
+				Keyworker: .5,
+				Medic: .5
+			 },
+			 trueNeg: {Unsymptomatic: {rep:5,msg:"Correct - The test worked and your patient is healthy"},
+				   Symptomatic: {rep:1,msg:"Correct - There are many causes of the observed symptom, you were right to rely on the test this time."},
+				   Keyworker: {rep:1,msg:"Correct - Even increased exposure doesn't necessarily lead to disease."},
+				   Medic: {rep:1,msg:"Correct - Always a relief to give a colleague good news"}},
+			 
+			 falsePos: {Unsymptomatic: {rep:-1,msg:"The test misled you - there's a lot of people with no symptoms, and because the test isn't 100% specific, some will result in a false positive test result. The patient will over-cautiously self-isolate, so not too much harm done"},
+				    Symptomatic: {rep:-2,msg:"You put too much faith in the test - even with patients presenting with the symptoms, there's still a chance the test is wrong. Wouldn't it be nice to have a better test."},
+				    Keyworker: {rep:-5,msg:"The patient self-isolated, but the disease never progressed. They couldn't do their key job, and let's hope they don't think they're now immune."},
+				    Medic: {rep:-5,msg:"Your colleague never really trusted your skills, and a second opinion with a better test revealed they didn't have the disease, so they returned to work, but your reputation has gone down."}},
+			 
+			 truePos: {Unsymptomatic: {rep:3,msg:"Your patient has the disease, and the test agreed. Well done Dr."},
+				   Symptomatic: {rep:3,msg:"An easy case to diagnose, symptoms and a positive test - but don't get over-confident."},
+				   Keyworker: {rep:5,msg:"This person could have been a super-spreader, so well done on detecting the disease."},
+				   Medic: {rep:5,msg:"Another colleage adversely affected. So sad and worrying, but you did a good job anyway."}},
+			 
+			 falseNeg: {Unsymptomatic: {rep:-3,msg:"Wrong. Despite showing no symptoms, and the test proving negative, the patient has the disease. This is a costly mistake as the patient may spread the disease more widely, but without a more sensitive test there's not much you could have done!"},
+				    Symptomatic: {rep:-5,msg:"Sometimes you should trust your medical instincts, rather than rely on an imperfect test. Wouldn't it be good if the test was more informative - maybe someone should invent a test that reports probablity of disease, so you could use your medical expertise more easily."},
+				    Keyworker: {rep:-10,msg:"Your patient has had exposure to the disease - this time it would have been better to play it safe and over-rule the test results. Who know's how many people they have spread it to?"},
+				    Medic: {rep:-2,msg:"It was bound to happen, misdiagnosing one of your colleagues is never good - better hope you administered the test correctly and it was just bad luck that they mistakenly tested negative. But even so, perhaps you should have carried out an independent test before clearing them."}},
+
+			 label_accept: {Unsymptomatic: "Submit coursework",
+					Symptomatic: "Submit thesis chapter",
+					Keyworker: "Submit journal paper",
+					Medic: "Investigate further"}
      };
      function reveal_result(event) {
 	 // Will replace this with flag from dataset
 	 var correct = (posOrNeg==event.data.obs)?"true":"false";
 	 var outcome = level_lookup[correct + event.data.obs][player_state.level];
-	 var pn={trueNeg:"True Mismatch", falseNeg:"False Mismatch", truePos:"True Match", falsePos:"False Match"};
+	 var pn={trueNeg:"True Negative", falseNeg:"False Negative", truePos:"True Positive", falsePos:"False Positive"};
 	 var t0=d3.select("#last_result").transition().style("background-color","#E9E9E9").text("Last Result - " + pn[correct+event.data.obs]);
 	 t0.transition().style("background-color", (correct=="true")?"#CCEBC5":"#FBB4AE");
 	 $("#outcome").text(outcome.msg);
-	 player_state.reputation *= outcome.rep;
+	 player_state.reputation += outcome.rep;
 	 $("#player_reputation").text(Math.floor(player_state.reputation));
 	 $("#progress").animate({width:100*player_state.reputation/(level_lookup.threshold[player_state.level]) + "%"});
 	 if (player_state.reputation >= level_lookup.threshold[player_state.level]) {
@@ -159,62 +217,18 @@
      }
      var margin = {top: 10, right: 50, bottom: 50, left: 50}
        , width = window.innerWidth - margin.left - margin.right-10
-       , height = window.innerHeight/2 - margin.top - margin.bottom;
-     
-     $(".wrap").height(height+50);
-     var xScale = d3.scaleLinear()
-		    .domain([0, 2000])
-		    .range([0, width]);
-     var yScale = d3.scaleLinear()
-		    .domain([0, 100]) 
-		    .range([height, 0]); 
-     var color = d3.scaleOrdinal(d3.schemeCategory10);
-
-     var datasets;
-     var data_k1 = "Baseline";
-     var data_k2 = "Down";
-     var data_ind = 1;
-     var dataset = [d3.range(20).map(function(d) { return {"y": 100*d3.randomUniform(1)() } }),
-		    d3.range(20).map(function(d) { return {"y": 100*d3.randomUniform(1)() } })];
-     var line = d3.line()
-		  .x(function(d, i) { return xScale(d.t); }) 
-		  .y(function(d) { return yScale(d.s*100); }) 
-		  .curve(d3.curveMonotoneX)
-     var area = d3.area()
-		  .x(function(d, i) { return xScale(d.t); }) 
-		  .y0(function(d) { return yScale(d.l*100); }) 
-		  .y1(function(d) { return yScale(d.u*100); }) 
-		  .curve(d3.curveMonotoneX)
+       , height = window.innerHeight/3 - margin.top - margin.bottom;
+     d3.select("#SVG_plot")
+       .attr("width", width + margin.left + margin.right)
+       .attr("height", height + margin.top + margin.bottom)
+     $(".wrap").height(300);
      var svg;
      function plot_chart() {
 	 posOrNeg = (Math.random() <level_lookup.pPos[player_state.level] )?"Pos":"Neg";
-	 data_ind = Math.floor(Math.random()*datasets.length);
 	 if (posOrNeg=="Pos") {
-	     data_k1 = (Math.random()<0.5)?"Baseline":"None";
-	     data_k2 = (Math.random()<0.5)?"Up":"Down";
+	     $("#test").show();
 	 } else {
-	     data_k1 = "Baseline";
-	     data_k2 = "None";
-	 }
-	 var lines = svg.selectAll(".KM_line")
-			.data([datasets[data_ind][data_k1], datasets[data_ind][data_k2]]).attr("d",line);
-	 lines.enter()
-	      .append("path")
-	      .attr("stroke", function(d, i) { return color(i); })
-	      .style("fill", "none")
-	      .style("stroke-width", 2)
-	      .attr("class", "KM_line")
- 	      .attr("d", line);
-	 if (player_state.level!="Undergraduate") {
-	     var areas = svg.selectAll(".KM_area")
-			    .data([datasets[data_ind][data_k1], datasets[data_ind][data_k2]]).attr("d", area);;
-	     areas.enter()
-		  .append("path")
-		  .style("stroke", "none")
-		  .style("fill", function(d, i) { return color(i); })
-		  .style("opacity", .5)
-		  .attr("class", "KM_area")
- 		  .attr("d", area);
+	     $("#test").hide();
 	 }
      }
      
@@ -223,7 +237,7 @@
 	     // dislike callback
 	     onDislike: function (item) {
 		 if (item.hasClass("pane2")) {
-		     reveal_result({data:{obs:"Neg"}});
+		     reveal_result({data:{obs:"Pos"}});
 		 } else {
 		     plot_chart();
 		 }
@@ -231,7 +245,7 @@
 	     // like callback
 	     onLike: function (item) {
 		 if (item.hasClass("pane2")) {
-		     reveal_result({data:{obs:"Pos"}});
+		     reveal_result({data:{obs:"Neg"}});
 		 } else {
 		     plot_chart();
 		 }
@@ -258,32 +272,12 @@
 	    $("#accept" ).click({obs:"Pos"}, reveal_result);
 	    $("#reject" ).click({obs:"Neg"}, reveal_result);
 	  */
-	 svg = d3.select("#KM_plot")
-		 .attr("width", width + margin.left + margin.right)
-		 .attr("height", height + margin.top + margin.bottom)
-		 .append("g")
-		 .attr("class", "plot_area")
-		 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-	 svg.append("g")
-	    .attr("class", "x axis")
-	    .attr("transform", "translate(0," + height + ")")
-	    .call(d3.axisBottom(xScale));
-	 svg.append("g")
-	    .attr("class", "y axis")
-	    .call(d3.axisLeft(yScale));
-
-	 svg.append("text")             
-	    .attr("transform","translate(" + (width/2) + " ," + (height + margin.top + 20) + ")")
-	    .style("text-anchor", "middle")
-	    .text("Days after diagnosis");
-	 svg.append("text")
-	    .attr("transform", "rotate(-90)")
-	    .attr("y", 0 - margin.left)
-	    .attr("x",0 - (height / 2))
-	    .attr("dy", "1em")
-	    .style("text-anchor", "middle")
-	    .text("Survival %");
-	 d3.json("km.json").then(function(data) {datasets = data;plot_chart();});
+	 /* d3.select("#SVG_plot")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom);
+	    d3.select("#SVG_plot g")
+	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")"); */
+	 plot_chart();
      });
      $(document).on("pageshow","#page1", function(){
 	 $('#welcome').popup('reposition', 'positionTo: window');
