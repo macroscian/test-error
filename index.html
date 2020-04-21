@@ -62,24 +62,33 @@
 		    width="100%">
 		  <text
 		      xml:space="preserve"
-		      style="font-style:normal;font-weight:normal;font-size:2.8px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+		      style="font-style:normal;font-weight:normal;font-size:3px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
 		      x="42.012325"
 		      y="11.112646"
 		      id="controlstr"><tspan
 					  id="tspan994"
 					  x="42.012325"
 					  y="11.112646"
-					  style="font-size:2.8px;stroke-width:0.26458332">Control</tspan></text>
+					  style="font-size:3px;stroke-width:0.26458332">Control</tspan></text>
 		  <text
 		      xml:space="preserve"
-		      style="font-style:normal;font-weight:normal;font-size:2.8px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+		      style="font-style:normal;font-weight:normal;font-size:3px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
 		      x="59.674431"
 		      y="11.020315"
 		      id="teststr"><tspan
 				       id="tspan994-8"
 				       x="59.674431"
 				       y="11.020315"
-				       style="font-size:2.8px;stroke-width:0.26458332">Test</tspan></text>
+				       style="font-size:3px;stroke-width:0.26458332">Test</tspan></text>
+		  <text
+		      xml:space="preserve"
+		      style="font-style:normal;font-weight:normal;font-size:5px;line-height:1.25;font-family:'Bradley Hand ITC';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+		      x="35"
+		      y="31.5"><tspan
+					id="patient_notes"
+					x="35"
+					y="31.5"
+					style="font-size:5px;stroke-width:0.26458332">Patient Notes</tspan></text>
 		  <rect
 		      style="display:inline;fill:none;stroke:#000000;stroke-width:0.23728547;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
 		      id="boundary"
@@ -116,6 +125,7 @@
 		</svg>
 		<div class="like"></div>
                 <div class="dislike"></div>
+		<p id="patient_long" style="margin:0;"></p>
 	      </li>
 	    </ul>
 	  </div>
@@ -145,64 +155,134 @@
     
     
     <script>
-     var player_state = {level:"Unsymptomatic",
-			 reputation:10,
+     var player_state = {level:"l1",
+			 reputation:1,
 			 max_reputation:10
      };
-     var posOrNeg;
-     var level_lookup = {descrip: {Unsymptomatic: "Your patient has no symptoms",
-				   Symptomatic: "Your patient has a disease symptom ",
-				   Keyworker: "Your patient works in an environment with a moderate exposure to others with the disease, and is not in self isolation",
-				   Medic: "You work in an environment with a high exposure to others"},
-			 status: {Unsymptomatic: "Level 1",
-				  Symptomatic: "Level 2",
-				  Keyworker: "Level 3",
-				  Medic: "Level 4"},
-			 threshold: {Unsymptomatic: 10,
-				     Symptomatic: 20,
-				     Keyworker: 30,
-				     Medic: 40},
-			 promotion: {Unsymptomatic: "Symptomatic",
-				     Symptomatic: "Keyworker",
-				     Keyworker: "Medic",
-				     Medic: "Winner"},
-			 pPos: {Unsymptomatic: .5,
-				Symptomatic: .5,
-				Keyworker: .5,
-				Medic: .5
-			 },
-			 trueNeg: {Unsymptomatic: {rep:5,msg:"Correct - The test worked and your patient is healthy"},
-				   Symptomatic: {rep:1,msg:"Correct - There are many causes of the observed symptom, you were right to rely on the test this time."},
-				   Keyworker: {rep:1,msg:"Correct - Even increased exposure doesn't necessarily lead to disease."},
-				   Medic: {rep:1,msg:"Correct - Always a relief to give a colleague good news"}},
-			 
-			 falsePos: {Unsymptomatic: {rep:-1,msg:"The test misled you - there's a lot of people with no symptoms, and because the test isn't 100% specific, some will result in a false positive test result. The patient will over-cautiously self-isolate, so not too much harm done"},
-				    Symptomatic: {rep:-2,msg:"You put too much faith in the test - even with patients presenting with the symptoms, there's still a chance the test is wrong. Wouldn't it be nice to have a better test."},
-				    Keyworker: {rep:-5,msg:"The patient self-isolated, but the disease never progressed. They couldn't do their key job, and let's hope they don't think they're now immune."},
-				    Medic: {rep:-5,msg:"Your colleague never really trusted your skills, and a second opinion with a better test revealed they didn't have the disease, so they returned to work, but your reputation has gone down."}},
-			 
-			 truePos: {Unsymptomatic: {rep:3,msg:"Your patient has the disease, and the test agreed. Well done Dr."},
-				   Symptomatic: {rep:3,msg:"An easy case to diagnose, symptoms and a positive test - but don't get over-confident."},
-				   Keyworker: {rep:5,msg:"This person could have been a super-spreader, so well done on detecting the disease."},
-				   Medic: {rep:5,msg:"Another colleage adversely affected. So sad and worrying, but you did a good job anyway."}},
-			 
-			 falseNeg: {Unsymptomatic: {rep:-3,msg:"Wrong. Despite showing no symptoms, and the test proving negative, the patient has the disease. This is a costly mistake as the patient may spread the disease more widely, but without a more sensitive test there's not much you could have done!"},
-				    Symptomatic: {rep:-5,msg:"Sometimes you should trust your medical instincts, rather than rely on an imperfect test. Wouldn't it be good if the test was more informative - maybe someone should invent a test that reports probablity of disease, so you could use your medical expertise more easily."},
-				    Keyworker: {rep:-10,msg:"Your patient has had exposure to the disease - this time it would have been better to play it safe and over-rule the test results. Who know's how many people they have spread it to?"},
-				    Medic: {rep:-2,msg:"It was bound to happen, misdiagnosing one of your colleagues is never good - better hope you administered the test correctly and it was just bad luck that they mistakenly tested negative. But even so, perhaps you should have carried out an independent test before clearing them."}},
-
-			 label_accept: {Unsymptomatic: "Submit coursework",
-					Symptomatic: "Submit thesis chapter",
-					Keyworker: "Submit journal paper",
-					Medic: "Investigate further"}
+     var posOrNeg, patientType;
+     var level_lookup = {
+	 descrip: {l1: "Your only patients are asymptomatic, this should be easy, but remember the test isn't completely reliable",
+		   l2: "You're getting more variety of patients now",
+		   l3: "Your decisions will have a greater impact now, when you get patients who are workers who have key roles, but could also potentially spread the disease to many more people.",
+		   l4: "Even your medical colleagues now trust you - don't let them down."
+	 },
+	 status:{l1: "Level 1",
+		 l2: "Level 2",
+		 l3: "Level 3",
+		 l4: "Level 4"
+	 },
+	 lpatient_prob: {
+	     l1: [{prob:1, patient:"Asymptomatic"}],
+	     l2: [{prob:.25, patient:"Asymptomatic"}, {prob:1, patient:"Symptomatic"}],
+	     l3: [{prob:.2, patient:"Asymptomatic"} , {prob:0.4, patient:"Symptomatic"}, {prob:1, patient:"Keyworker"}],
+	     l4: [{prob:.15, patient:"Asymptomatic"}, {prob:0.3,  patient:"Symptomatic"}, {prob:0.5, patient:"Keyworker"} , {prob:1, patient:"Medic"}]
+	 },
+	 patient_descrip: {Asymptomatic: "Your patient has no symptoms",
+			   Symptomatic: "Your patient has a disease symptom ",
+			   Keyworker: "Your patient works in an environment with a moderate exposure to others with the disease, and is not in self isolation",
+			   Medic: "You work in an environment with a high exposure to others"},
+	 threshold: {l1: 10,
+		     l2: 20,
+		     l3: 30,
+		     l4: 40},
+	 promotion: {l1: "l2",
+		     l2: "l3",
+		     l3: "l4",
+		     l4: "Winner"},
+	 pPos: {l1: .5,
+		l2: .5,
+		l3: .5,
+		l4: .5
+	 },
+	 predictive_val: {
+	     Pos: {
+		 Asymptomatic: 0.8,
+		 Symptomatic: 0.9,
+		 Keyworker: 0.9,
+		 Medic: 0.75},
+	     Neg: {
+		 Asymptomatic: 0.8,
+		 Symptomatic: 0.7,
+		 Keyworker: 0.6,
+		 Medic: 0.75}
+	 },
+	 
+	 correct:  {
+	     // Healthy and said so
+	     trueNeg: { 
+		 Asymptomatic: {rep:5,msg:"The test worked and your patient is healthy"},
+		 Symptomatic: {rep:1,msg:"There are many causes of the observed symptom, you were right to rely on the test this time."},
+		 Keyworker: {rep:1,msg:"Even increased exposure doesn't necessarily lead to disease."},
+		 Medic: {rep:1,msg:"Always a relief to give a colleague good news"}
+	     },
+	     falsePos: {
+		 Asymptomatic: {rep:1,msg:"The test would have misled you, but your intuition to ignore the test on this patient was right - was it a lucky guess? Not very scientific."},
+		 Symptomatic: {rep:2,msg:"The symptoms were pointing you in the right direction - shame the test isn't as good as you are."},
+		 Keyworker: {rep:5,msg:"Well done, if we'd relied solely on the test, this key worker would now be self-isolating needlessly"},
+		 Medic: {rep:5,msg:"Your colleague confirmed your diagnosis with a better test - perhaps we should look at upgrading to that higher-specificty test."}
+	     },
+	     // unwell and said so
+	     truePos: {
+		 Asymptomatic: {rep:3,msg:"Your patient has the disease, and the test agreed. Well done Dr."},
+		 Symptomatic: {rep:3,msg:"An easy case to diagnose, symptoms and a positive test - but don't get over-confident."},
+		 Keyworker: {rep:5,msg:"This person could have been a super-spreader, so well done on detecting the disease."},
+		 Medic: {rep:5,msg:"Another colleage adversely affected. So sad and worrying, but you did a good job anyway."}
+	     },
+	     falseNeg: {
+		 Asymptomatic: {rep:3,msg:"Despite showing no symptoms, and the test proving negative, the patient has the disease. Once again your intuition proved lucky."},
+		 Symptomatic: {rep:5,msg:"Well done for believing the symptoms - the test's lack of sensitivity could have misled you here."},
+		 Keyworker: {rep:10,msg:"Overruling a faulty test result means this key worker avoided spreading it to vulnerable members of the public. But we really need a more sensitive test."},
+		 Medic: {rep:2,msg:"Your colleague didn't believe you at first, but a second opinion with a more sensitive test convinced them."}
+	     }
+	 },
+	 misdiagnosis: {
+	     // healthy but said unwell
+	     trueNeg: {
+		 Asymptomatic: {rep:-3,msg:"No symptoms and a negative test result - all the signs were pointing in the right direction but you ignored them."},
+		 Symptomatic: {rep:-2,msg:"You put too much faith in the medical symptoms - you should have believed the test results this time."},
+		 Keyworker: {rep:-5,msg:"Maybe you were right to be cautious as they could have been a super-spreader, but this time you should have believed the test result."},
+		 Medic: {rep:-10,msg:"Needlessly you're going to have to cope without a valued colleague who is now self-isolating due to your mistake."}
+	     },
+	     falsePos: {
+		 Asymptomatic: {rep:-1,msg:"The test misled you - there's a lot of people with no symptoms, and because the test isn't 100% specific, some will result in a false positive test result. The patient will over-cautiously self-isolate, so not too much harm done"},
+		 Symptomatic: {rep:-2,msg:"You put too much faith in the test - even with patients presenting with the symptoms, there's still a chance the test is wrong. Wouldn't it be nice to have a better test."},
+		 Keyworker: {rep:-5,msg:"The patient self-isolated, but the disease never progressed. They couldn't do their key job, and let's hope they don't think they're now immune."},
+		 Medic: {rep:-5,msg:"Your colleague never really trusted your skills, and a second opinion with a better test revealed they didn't have the disease, so they returned to work, but your reputation has gone down."}
+	     },
+	     // unwell but said healthy
+	     truePos: {
+		 Asymptomatic: {rep:-3,msg:"We know the test is unreliable, but that doesn't mean do the opposite of what it says.  It's reasonably predictive even for patients with no symptoms."},
+		 Symptomatic: {rep:-3,msg:"The test and the symptoms should have been a red flag - what where you thinking?"},
+		 Keyworker: {rep:-10,msg:"Plenty of exposure to the disease, and a positive test - how much more evidence do you need? This person has gone back to work with false confidence - there will be repurcussions"},
+		 Medic: {rep:-5,msg:"Your colleague might have assured you they were feeling fine, but at least you should have sent them for a test with higher specificity if they you were having doubts."}
+	     },
+	     falseNeg: {
+		 Asymptomatic: {rep:-3,msg:"Wrong. Despite showing no symptoms, and the test proving negative, the patient has the disease. This is a costly mistake as the patient may spread the disease more widely, but without a more sensitive test there's not much you could have done!"},
+		 Symptomatic: {rep:-5,msg:"Sometimes you should trust your medical instincts, rather than rely on an imperfect test. Wouldn't it be good if the test was more informative - maybe someone should invent a test that reports probablity of disease, so you could use your medical expertise more easily."},
+		 Keyworker: {rep:-10,msg:"Your patient has had exposure to the disease - this time it would have been better to play it safe and over-rule the test results. Who know's how many people they have spread it to?"},
+		 Medic: {rep:-2,msg:"It was bound to happen, misdiagnosing one of your colleagues is never good - better hope you administered the test correctly and it was just bad luck that they mistakenly tested negative. But even so, perhaps you should have carried out an independent test before clearing them."}
+	     }
+	 },
+	 
+	 label_accept: {Asymptomatic: "Submit coursework",
+			Symptomatic: "Submit thesis chapter",
+			Keyworker: "Submit journal paper",
+			Medic: "Investigate further"}
      };
      function reveal_result(event) {
-	 // Will replace this with flag from dataset
-	 var correct = (posOrNeg==event.data.obs)?"true":"false";
-	 var outcome = level_lookup[correct + event.data.obs][player_state.level];
+	 var test_is_right = Math.random() < level_lookup.predictive_val[posOrNeg][patientType];
+	 var error_class=((test_is_right)?"true":"false") + posOrNeg;
+	 var disease_state;
+	 if (test_is_right) {
+	     disease_state=posOrNeg;
+	 } else {
+	     disease_state={Pos:"Neg", Neg:"Pos"}[posOrNeg];
+	 }
+	 var correct = (disease_state == event.data.obs)?"correct":"misdiagnosis";
+	 var outcome = level_lookup[correct][error_class][patientType];
 	 var pn={trueNeg:"True Negative", falseNeg:"False Negative", truePos:"True Positive", falsePos:"False Positive"};
-	 var t0=d3.select("#last_result").transition().style("background-color","#E9E9E9").text("Last Result - " + pn[correct+event.data.obs]);
-	 t0.transition().style("background-color", (correct=="true")?"#CCEBC5":"#FBB4AE");
+	 var t0=d3.select("#last_result").transition().style("background-color","#E9E9E9").text("Last Result - " + pn[error_class]);
+	 t0.transition().style("background-color", (correct=="correct")?"#CCEBC5":"#FBB4AE");
 	 $("#outcome").text(outcome.msg);
 	 player_state.reputation += outcome.rep;
 	 $("#player_reputation").text(Math.floor(player_state.reputation));
@@ -217,14 +297,18 @@
      }
      var margin = {top: 10, right: 50, bottom: 50, left: 50}
        , width = window.innerWidth - margin.left - margin.right-10
-       , height = window.innerHeight/3 - margin.top - margin.bottom;
+       , height = window.innerHeight/3.5 - margin.top - margin.bottom;
      d3.select("#SVG_plot")
        .attr("width", width + margin.left + margin.right)
        .attr("height", height + margin.top + margin.bottom)
      $(".wrap").height(300);
      var svg;
      function plot_chart() {
+	 var pprob=Math.random();
 	 posOrNeg = (Math.random() <level_lookup.pPos[player_state.level] )?"Pos":"Neg";
+	 patientType = level_lookup.lpatient_prob[player_state.level].find(x => x.prob > pprob).patient;
+	 $("#patient_notes").text(patientType);
+	 $("#patient_long").text(level_lookup.patient_descrip[patientType]);
 	 if (posOrNeg=="Pos") {
 	     $("#test").show();
 	 } else {
