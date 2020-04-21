@@ -32,6 +32,18 @@
 	</div>
       </div>
 
+      <div data-role="popup" id="loser" data-overlay-theme="b" data-theme="b" data-position-to="window" data-history="false">
+	<div data-role="header">
+	  <h1>Sorry, you lost</h1>
+	</div><!-- /header -->
+	<div role="main" class="ui-content" data-history="false">
+	  <p>You have lost all your reputation - do you blame the test or your judgement.</p>
+	  <p>Tests with greater predictive power would be helpful, tuned to reflect what we know about the patient and the costs of making a wrong decision. Probability is a better summary of evidence than yes/no decisions</p>
+	  <pBut let's try again with what we've got.</p>
+	  <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b" data-rel="back">OK</a>
+	</div>
+      </div>
+
       <div data-role="header">
 	<h1>TestErr</h1>
 	<div id="progress" style="height:5px;width:0%;background-color:green"></div>
@@ -44,7 +56,6 @@
 	      <li class="pane1">
 		<h3 id="last_result" class="ui-bar ui-bar-a ui-corner-all"></h3>
 		<div id="outcome" class="ui-body"></div>
-		<input type="image" src="img/continue.png" onclick='$("#tinderslide").jTinder("like");' />
 	      </li>
               <li class="pane2">
 		<svg
@@ -151,16 +162,21 @@
 			 reputation:1
      };
      var posOrNeg, patientType;
+     var reminder_timer;
      var level_lookup = {
-	 descrip: {l1: "Your only patients are asymptomatic, this should be easy, but remember the test isn't completely reliable",
-		   l2: "You're getting more variety of patients now",
+	 descrip: {l1: "Your only patients are asymptomatic, this should be easy, but remember the test isn't completely reliable.",
+		   l2: "You're getting more varied patients now.",
 		   l3: "Your decisions will have a greater impact now, when you get patients who are workers who have key roles, but could also potentially spread the disease to many more people.",
-		   l4: "Even your medical colleagues now trust you - don't let them down."
+		   l4: "Even your medical colleagues now trust you - don't let them down.",
+		   Winner: "Hopefully you have a bit more understanding of the different types of error that can be made when making decisions. Tests, and prior information, are all sources of evidence that can influence a decision, but mistakes can still happen, and the costs of these mistakes is very context-dependent. We'll take you back to the beginning, to see if things work out differently.",
+		   Loser: "You have lost all your reputation - do you blame the test or your judgement. Tests with greater predictive power would be helpful, tuned to reflect what we know about the patient and the costs of making a wrong decision. Probability is a better summary of evidence than yes/no decisions. But let's try again with what we've got."
 	 },
 	 status:{l1: "Level 1",
 		 l2: "Level 2",
 		 l3: "Level 3",
-		 l4: "Level 4"
+		 l4: "Level 4",
+		 Winner: "Winner",
+		 Loser: "Loser"
 	 },
 	 lpatient_prob: {
 	     l1: [{prob:1, patient:"Asymptomatic"}],
@@ -168,10 +184,10 @@
 	     l3: [{prob:.2, patient:"Asymptomatic"} , {prob:0.4, patient:"Symptomatic"}, {prob:1, patient:"Keyworker"}],
 	     l4: [{prob:.15, patient:"Asymptomatic"}, {prob:0.3,  patient:"Symptomatic"}, {prob:0.5, patient:"Keyworker"} , {prob:1, patient:"Medic"}]
 	 },
-	 patient_descrip: {Asymptomatic: "Your patient has no symptoms",
-			   Symptomatic: "Your patient has a disease symptom ",
-			   Keyworker: "Your patient works in an environment with a moderate exposure to others with the disease, and is not in self isolation",
-			   Medic: "You work in an environment with a high exposure to others"},
+	 patient_descrip: {Asymptomatic: "Your patient has no symptoms.",
+			   Symptomatic: "Your patient has a disease symptom.",
+			   Keyworker: "Your patient works in an environment with a moderate exposure to others with the disease, and is not in self isolation.",
+			   Medic: "Your patient is a valued medical colleague."},
 	 threshold: {l1: 10,
 		     l2: 20,
 		     l3: 30,
@@ -201,7 +217,7 @@
 	 correct:  {
 	     // Healthy and said so
 	     trueNeg: { 
-		 Asymptomatic: {rep:5,msg:"The test worked and your patient is healthy"},
+		 Asymptomatic: {rep:3,msg:"The test worked and your patient is healthy"},
 		 Symptomatic: {rep:1,msg:"There are many causes of the observed symptom, you were right to rely on the test this time."},
 		 Keyworker: {rep:1,msg:"Even increased exposure doesn't necessarily lead to disease."},
 		 Medic: {rep:1,msg:"Always a relief to give a colleague good news"}
@@ -214,7 +230,7 @@
 	     },
 	     // unwell and said so
 	     truePos: {
-		 Asymptomatic: {rep:3,msg:"Your patient has the disease, and the test agreed. Well done Dr."},
+		 Asymptomatic: {rep:3,msg:"Your patient has the disease, and the test agreed. Well done doctor."},
 		 Symptomatic: {rep:3,msg:"An easy case to diagnose, symptoms and a positive test - but don't get over-confident."},
 		 Keyworker: {rep:5,msg:"This person could have been a super-spreader, so well done on detecting the disease."},
 		 Medic: {rep:5,msg:"Another colleage adversely affected. So sad and worrying, but you did a good job anyway."}
@@ -253,12 +269,7 @@
 		 Keyworker: {rep:-10,msg:"Your patient has had exposure to the disease - this time it would have been better to play it safe and over-rule the test results. Who know's how many people they have spread it to?"},
 		 Medic: {rep:-2,msg:"It was bound to happen, misdiagnosing one of your colleagues is never good - better hope you administered the test correctly and it was just bad luck that they mistakenly tested negative. But even so, perhaps you should have carried out an independent test before clearing them."}
 	     }
-	 },
-	 
-	 label_accept: {Asymptomatic: "Submit coursework",
-			Symptomatic: "Submit thesis chapter",
-			Keyworker: "Submit journal paper",
-			Medic: "Investigate further"}
+	 }
      };
      function reveal_result(event) {
 	 var test_is_right = Math.random() < level_lookup.predictive_val[posOrNeg][patientType];
@@ -277,23 +288,30 @@
 	 $("#outcome").text(outcome.msg);
 	 player_state.reputation += outcome.rep;
 	 $("#progress").animate({width:100*player_state.reputation/(level_lookup.threshold[player_state.level]) + "%"});
+	 reminder_timer=setTimeout(wobble_reminder, 4000);
      }
      var margin = {top: 10, right: 50, bottom: 50, left: 50}
        , width = window.innerWidth - margin.left - margin.right-10
-       , height = window.innerHeight/3.5 - margin.top - margin.bottom;
+       , height = window.innerHeight/2.5 - margin.top - margin.bottom;
      d3.select("#SVG_plot")
        .attr("width", width + margin.left + margin.right)
        .attr("height", height + margin.top + margin.bottom)
      $(".wrap").height(300);
      var svg;
      function plot_chart() {
+	 clearTimeout(reminder_timer);
 	 if (player_state.reputation >= level_lookup.threshold[player_state.level]) {
 	     $("#popupDialog").popup("open");
 	     player_state.level = level_lookup.promotion[player_state.level];
-	     $(".player_status").text(level_lookup.status[player_state.level]);
-	     $(".player_descrip").text(level_lookup.descrip[player_state.level]);
-	     $("#accept").text(level_lookup.label_accept[player_state.level]);
 	 }
+	 if (player_state.reputation < 0) {
+	     player_state.level = "Loser";
+	     $("#loser").popup("open");
+	     player_state = {level:"l1",reputation:1};
+	 }
+	 $("#player_reputation").text(player_state.reputation);
+	 $(".player_status").text(level_lookup.status[player_state.level]);
+	 $(".player_descrip").text(level_lookup.descrip[player_state.level]);
 	 var pprob=Math.random();
 	 posOrNeg = (Math.random() <level_lookup.pPos[player_state.level] )?"Pos":"Neg";
 	 patientType = level_lookup.lpatient_prob[player_state.level].find(x => x.prob > pprob).patient;
@@ -305,6 +323,15 @@
 	     $("#test").hide();
 	 }
      }
+
+     function wobble_reminder(panel) {
+	 $(".pane1").animate({left:+100}, 200)
+		    .animate({left:+0}, 200)
+		    .animate({left:-100}, 200)
+		    .animate({left:+0}, 200);
+	 reminder_timer=setTimeout(wobble_reminder, 3000);
+     }
+
      
      $(function(){
 	 $("#tinderslide").jTinder({
@@ -330,7 +357,7 @@
 	     likeSelector: '.like',
 	     dislikeSelector: '.dislike'
 	 });
-
+	 
 	 /**
 	  * Set button action to trigger jTinder like & dislike.
 	  */
@@ -341,16 +368,12 @@
 	 $(".player_status").text(level_lookup.status[player_state.level]);
 	 $(".player_descrip").text(level_lookup.descrip[player_state.level]);
 	 $("#player_reputation").text(player_state.reputation);
-	 $( "#popupDialog" ).on( "popupafterclose", function( event, ui ) {$("#progress").animate({width:100*player_state.reputation/(level_lookup.threshold[player_state.level]) + "%"})} );
-	 /* 
-	    $("#accept" ).click({obs:"Pos"}, reveal_result);
-	    $("#reject" ).click({obs:"Neg"}, reveal_result);
-	  */
-	 /* d3.select("#SVG_plot")
-	    .attr("width", width + margin.left + margin.right)
-	    .attr("height", height + margin.top + margin.bottom);
-	    d3.select("#SVG_plot g")
-	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")"); */
+	 $( "#popupDialog" ).on( "popupafterclose", function( event, ui ) {
+	     if (player_state.level=="Winner") {
+		 player_state = {level:"l1",reputation:1};
+	     };
+	     $("#progress").animate({width:100*player_state.reputation/(level_lookup.threshold[player_state.level]) + "%"})
+	 } );
 	 plot_chart();
      });
      $(document).on("pageshow","#page1", function(){
