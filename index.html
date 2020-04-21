@@ -6,24 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     <link rel="stylesheet" type="text/css" href="css/jTinder.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Handlee" />
     <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script type="text/javascript" src="js/jquery.transform2d.js"></script>
     <script type="text/javascript" src="js/jquery.jTinder.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
-    <style>
-     .axis path,
-     .axis line {
-	 fill: none;
-	 stroke: grey;
-	 stroke-width: 1;
-	 shape-rendering: crispEdges;
-     }
-    </style>
   </head>
   <body>
-
+    
 
     <div data-role="page" id="page1">
 
@@ -82,13 +74,13 @@
 				       style="font-size:3px;stroke-width:0.26458332">Test</tspan></text>
 		  <text
 		      xml:space="preserve"
-		      style="font-style:normal;font-weight:normal;font-size:5px;line-height:1.25;font-family:'Bradley Hand ITC';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+		      style="font-style:normal;font-weight:normal;font-size:5px;line-height:1.25;font-family:'Handlee';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
 		      x="35"
 		      y="31.5"><tspan
-					id="patient_notes"
-					x="35"
-					y="31.5"
-					style="font-size:5px;stroke-width:0.26458332">Patient Notes</tspan></text>
+				   id="patient_notes"
+				   x="35"
+				   y="31.5"
+				   style="font-size:5px;stroke-width:0.26458332">Patient Notes</tspan></text>
 		  <rect
 		      style="display:inline;fill:none;stroke:#000000;stroke-width:0.23728547;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
 		      id="boundary"
@@ -156,8 +148,7 @@
     
     <script>
      var player_state = {level:"l1",
-			 reputation:1,
-			 max_reputation:10
+			 reputation:1
      };
      var posOrNeg, patientType;
      var level_lookup = {
@@ -285,15 +276,7 @@
 	 t0.transition().style("background-color", (correct=="correct")?"#CCEBC5":"#FBB4AE");
 	 $("#outcome").text(outcome.msg);
 	 player_state.reputation += outcome.rep;
-	 $("#player_reputation").text(Math.floor(player_state.reputation));
 	 $("#progress").animate({width:100*player_state.reputation/(level_lookup.threshold[player_state.level]) + "%"});
-	 if (player_state.reputation >= level_lookup.threshold[player_state.level]) {
-	     $("#popupDialog").popup("open");
-	     player_state.level = level_lookup.promotion[player_state.level];
-	     $(".player_status").text(level_lookup.status[player_state.level]);
-	     $(".player_descrip").text(level_lookup.descrip[player_state.level]);
-	     $("#accept").text(level_lookup.label_accept[player_state.level]);
-	 }
      }
      var margin = {top: 10, right: 50, bottom: 50, left: 50}
        , width = window.innerWidth - margin.left - margin.right-10
@@ -304,6 +287,13 @@
      $(".wrap").height(300);
      var svg;
      function plot_chart() {
+	 if (player_state.reputation >= level_lookup.threshold[player_state.level]) {
+	     $("#popupDialog").popup("open");
+	     player_state.level = level_lookup.promotion[player_state.level];
+	     $(".player_status").text(level_lookup.status[player_state.level]);
+	     $(".player_descrip").text(level_lookup.descrip[player_state.level]);
+	     $("#accept").text(level_lookup.label_accept[player_state.level]);
+	 }
 	 var pprob=Math.random();
 	 posOrNeg = (Math.random() <level_lookup.pPos[player_state.level] )?"Pos":"Neg";
 	 patientType = level_lookup.lpatient_prob[player_state.level].find(x => x.prob > pprob).patient;
