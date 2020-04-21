@@ -34,12 +34,24 @@
 
       <div data-role="popup" id="loser" data-overlay-theme="b" data-theme="b" data-position-to="window" data-history="false">
 	<div data-role="header">
-	  <h1>Sorry, you lost</h1>
+	  <h1>Sorry, You Lost</h1>
 	</div><!-- /header -->
 	<div role="main" class="ui-content" data-history="false">
 	  <p>You have lost all your reputation - do you blame the test or your judgement.</p>
 	  <p>Tests with greater predictive power would be helpful, tuned to reflect what we know about the patient and the costs of making a wrong decision. Probability is a better summary of evidence than yes/no decisions</p>
 	  <pBut let's try again with what we've got.</p>
+	    <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b" data-rel="back">OK</a>
+	</div>
+      </div>
+
+      <div data-role="popup" id="winner" data-overlay-theme="b" data-theme="b" data-position-to="window" data-history="false">
+	<div data-role="header">
+	  <h1>Well Done, You Won</h1>
+	</div><!-- /header -->
+	<div role="main" class="ui-content" data-history="false">
+	  <p>Hopefully you have a bit more understanding of the different types of error that can be made when making decisions.</p>
+	  <p>Tests, and prior information, are all sources of evidence that can influence a decision, but mistakes can still happen, and the costs of these mistakes is very context-dependent.</p>
+	  <p>We'll take you back to the beginning, to see if things work out differently.</p>
 	  <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b" data-rel="back">OK</a>
 	</div>
       </div>
@@ -159,7 +171,7 @@
     
     <script>
      var player_state = {level:"l1",
-			 reputation:1
+			 reputation:5
      };
      var posOrNeg, patientType;
      var reminder_timer;
@@ -167,16 +179,12 @@
 	 descrip: {l1: "Your only patients are asymptomatic, this should be easy, but remember the test isn't completely reliable.",
 		   l2: "You're getting more varied patients now.",
 		   l3: "Your decisions will have a greater impact now, when you get patients who are workers who have key roles, but could also potentially spread the disease to many more people.",
-		   l4: "Even your medical colleagues now trust you - don't let them down.",
-		   Winner: "Hopefully you have a bit more understanding of the different types of error that can be made when making decisions. Tests, and prior information, are all sources of evidence that can influence a decision, but mistakes can still happen, and the costs of these mistakes is very context-dependent. We'll take you back to the beginning, to see if things work out differently.",
-		   Loser: "You have lost all your reputation - do you blame the test or your judgement. Tests with greater predictive power would be helpful, tuned to reflect what we know about the patient and the costs of making a wrong decision. Probability is a better summary of evidence than yes/no decisions. But let's try again with what we've got."
+		   l4: "Even your medical colleagues now trust you - don't let them down."
 	 },
 	 status:{l1: "Level 1",
 		 l2: "Level 2",
 		 l3: "Level 3",
-		 l4: "Level 4",
-		 Winner: "Winner",
-		 Loser: "Loser"
+		 l4: "Level 4"
 	 },
 	 lpatient_prob: {
 	     l1: [{prob:1, patient:"Asymptomatic"}],
@@ -188,10 +196,10 @@
 			   Symptomatic: "Your patient has a disease symptom.",
 			   Keyworker: "Your patient works in an environment with a moderate exposure to others with the disease, and is not in self isolation.",
 			   Medic: "Your patient is a valued medical colleague."},
-	 threshold: {l1: 10,
-		     l2: 20,
-		     l3: 30,
-		     l4: 40},
+	 threshold: {l1: 15,
+		     l2: 25,
+		     l3: 35,
+		     l4: 45},
 	 promotion: {l1: "l2",
 		     l2: "l3",
 		     l3: "l4",
@@ -233,7 +241,7 @@
 		 Asymptomatic: {rep:3,msg:"Your patient has the disease, and the test agreed. Well done doctor."},
 		 Symptomatic: {rep:3,msg:"An easy case to diagnose, symptoms and a positive test - but don't get over-confident."},
 		 Keyworker: {rep:5,msg:"This person could have been a super-spreader, so well done on detecting the disease."},
-		 Medic: {rep:5,msg:"Another colleage adversely affected. So sad and worrying, but you did a good job anyway."}
+		 Medic: {rep:5,msg:"Another colleague adversely affected. So sad and worrying, but you did a good job anyway."}
 	     },
 	     falseNeg: {
 		 Asymptomatic: {rep:3,msg:"Despite showing no symptoms, and the test proving negative, the patient has the disease. Once again your intuition proved lucky."},
@@ -296,13 +304,18 @@
      d3.select("#SVG_plot")
        .attr("width", width + margin.left + margin.right)
        .attr("height", height + margin.top + margin.bottom)
-     $(".wrap").height(300);
+     $(".wrap").height(250);
      var svg;
      function plot_chart() {
 	 clearTimeout(reminder_timer);
 	 if (player_state.reputation >= level_lookup.threshold[player_state.level]) {
-	     $("#popupDialog").popup("open");
-	     player_state.level = level_lookup.promotion[player_state.level];
+	     if (player_state.level=="l4") {
+		 $("#winner").popup("open");
+		 player_state = {level:"l1",reputation:1};
+	     } else {
+		 $("#popupDialog").popup("open");
+		 player_state.level = level_lookup.promotion[player_state.level];
+	     }
 	 }
 	 if (player_state.reputation < 0) {
 	     player_state.level = "Loser";
@@ -369,9 +382,6 @@
 	 $(".player_descrip").text(level_lookup.descrip[player_state.level]);
 	 $("#player_reputation").text(player_state.reputation);
 	 $( "#popupDialog" ).on( "popupafterclose", function( event, ui ) {
-	     if (player_state.level=="Winner") {
-		 player_state = {level:"l1",reputation:1};
-	     };
 	     $("#progress").animate({width:100*player_state.reputation/(level_lookup.threshold[player_state.level]) + "%"})
 	 } );
 	 plot_chart();
