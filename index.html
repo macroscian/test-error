@@ -61,7 +61,9 @@
       </div>
 
       <div data-role="header">
+	<a href="javascript:show_welcome();" data-icon="info">Help</a>
 	<h1>TestErr</h1>
+	<a href="https://www.guermantes.xyz" data-icon="home">Home</a>
 	<div id="progress" style="height:5px;width:0%;background-color:green"></div>
       </div><!-- /header -->
 
@@ -349,7 +351,23 @@
 	 reminder_timer=setTimeout(wobble_reminder, 3000);
      }
 
-     
+     function show_welcome(){
+	 $('#welcome').popup('reposition', 'positionTo: window');
+	 $("#welcome").popup("open");
+	 
+
+     }
+     function init_welcome() {
+	 show_welcome();
+	 $("#welcome").on( "popupafterclose", function( event, ui ) {
+	     $("#progress").animate({width:100*player_state.reputation/(level_lookup.threshold[player_state.level]) + "%"});
+	     $(".pane2")
+		 .animate({left:+200},  {step:function( now, fx ) {$( ".like" ).css( "opacity", now/200 );}})
+		 .animate({left:+0},  {step:function( now, fx ) {$( ".like" ).css( "opacity", now/200 );}})
+		 .animate({left:-200},  {step:function( now, fx ) {$( ".dislike" ).css( "opacity", -now/200 );}})
+		 .animate({left:+0},  {step:function( now, fx ) {$( ".dislike" ).css( "opacity", -now/200 );}})
+	 });
+     }
      $(function(){
 	 $("#tinderslide").jTinder({
 	     // dislike callback
@@ -390,19 +408,7 @@
 	 } );
 	 plot_chart();
      });
-     $(document).on("pageshow","#page1", function(){
-	 $('#welcome').popup('reposition', 'positionTo: window');
-	 $("#welcome").popup("open");
-	 
-	 $("#welcome").on( "popupafterclose", function( event, ui ) {
-	     $("#progress").animate({width:100*player_state.reputation/(level_lookup.threshold[player_state.level]) + "%"});
-	     $(".pane2")
-		 .animate({left:+200},  {step:function( now, fx ) {$( ".like" ).css( "opacity", now/200 );}})
-		 .animate({left:+0},  {step:function( now, fx ) {$( ".like" ).css( "opacity", now/200 );}})
-		 .animate({left:-200},  {step:function( now, fx ) {$( ".dislike" ).css( "opacity", -now/200 );}})
-		 .animate({left:+0},  {step:function( now, fx ) {$( ".dislike" ).css( "opacity", -now/200 );}})
-	 });
-     });
+     $(document).on("pageshow","#page1", init_welcome);
     </script>
   </body>
 </html>
